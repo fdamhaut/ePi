@@ -1,0 +1,114 @@
+import cv2
+
+
+def get_corners(img):
+
+    def tpl2sum(a, b):
+        return tuple([int(a[0]*2-b[0]), int(a[1]*2-b[1])])
+
+    #Inner Corners
+    ret, corners = cv2.findChessboardCorners(img, (6, 5), None)
+    corners = [tuple(i[0]) for i in corners]
+
+    #Exterior Corners
+    leftcorner = []
+    rightcorner = []
+    topcorner = []
+    botcorner = []
+
+    for i in range(5):
+        leftcorner += [tpl2sum(corners[i*6], corners[i*6+1])]       # Add left corners
+        rightcorner += [tpl2sum(corners[i*6+5], corners[i*6+4])]    # Add right corners
+    for i in range(6):
+        topcorner += [tpl2sum(corners[i], corners[i+6])]            # Add top corners
+        botcorner += [tpl2sum(corners[24+i], corners[18+i])]        # Add bottom corners
+
+    topcorner = [tpl2sum(leftcorner[0], leftcorner[1])] + topcorner + [tpl2sum(rightcorner[0], rightcorner[1])]     # TopLeft + TopRight Corners
+    botcorner = [tpl2sum(leftcorner[4], leftcorner[3])] + botcorner + [tpl2sum(rightcorner[4], rightcorner[3])]     # BotLeft + BotRight Corners
+
+    # Reordering
+    finalcorner = topcorner
+    for i in range(5):
+        finalcorner += [leftcorner[i]] + corners[i*6:i*6+6] + [rightcorner[i]]
+    finalcorner += botcorner
+
+    return finalcorner
+
+
+def get_centers(corners, size):
+    centers = []
+    for i in range(size[0]):
+        for j in range(size[1]):
+            tl = j * (size[0]+1) + i
+            centerx = corners[tl][0] + corners[tl + 1][0] + corners[tl + size[0]+1][0] + corners[tl + size[0]+1 + 1][0]
+            centery = corners[tl][1] + corners[tl + 1][1] + corners[tl + size[0]+1][1] + corners[tl + size[0]+1 + 1][1]
+            centerx = int(centerx/4)
+            centery = int(centery/4)
+            centers += [(centerx, centery)]
+    return centers
+
+
+def get_grid(img, centers, size):
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    redmask = cv2.inRange(hsv, (0, 50, 50), (10, 255, 255))
+    redmask += cv2.inRange(hsv, (170, 50, 50), (180, 255, 255))
+    yellowmask = cv2.inRange(hsv, (20, 50, 50), (35, 255, 255))
+
+    grid = [['E']*size[0] for i in range(size[1])]
+
+    for e, c in enumerate(centers):
+        c = (c[1], c[0])
+        if redmask[c]:
+            grid[e % size[1]][int(e/size[1])] = 'R'
+        if yellowmask[c]:
+            grid[e % size[1]][int(e / size[1])] = 'Y'
+
+    return grid
+
+
+def process_image(image_path, template_path):
+    size = (7, 6)
+
+    # Only once on the template
+    corners = get_corners(cv2.imread(template_path))
+    centers = get_centers(corners, size)
+
+    # Every turn
+    grid = get_grid(cv2.imread(image_path), centers, size)
+
+    return grid
+
+
+# Visual confirmation Points
+def process_image_visual(image_path, template_path):
+    size = (7, 6)
+
+    # Only once on the template
+    corners = get_corners(cv2.imread(template_path))
+    centers = get_centers(corners, size)
+
+    # Every turn
+    grid = get_grid(cv2.imread(image_path), centers, size)
+
+    out = cv2.imread(image_path)
+    for i in corners:
+        cv2.circle(out, i, 2, (0, 0, 255), 7)
+
+    for i in centers:
+        cv2.circle(out, i, 2, (0, 255, 0), 7)
+
+    cv2.imshow("Result", out)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    return grid
+
+
+if __name__ == "__main__":
+    img = "ImagesTest/game5.jpg"
+    template = "ImagesTest/template.jpg"
+    grid = process_image(img, template)
+
+    for l in grid:
+        print(l)
