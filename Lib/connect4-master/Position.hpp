@@ -87,7 +87,7 @@ class Position {
   static constexpr int HEIGHT = 6; // height of the board
 
   // Board size is 64bits or 128 bits depending on WIDTH and HEIGHT
-  using position_t = typename std::conditional < WIDTH * (HEIGHT + 1) <= 64, uint64_t, __int128>::type;
+  using position_t = uint64_t;
   // __int128 is a g++ non portable type. Use the following line limited to 64bits board for C++ compatibility
   // using position_t = uint64_t
 
