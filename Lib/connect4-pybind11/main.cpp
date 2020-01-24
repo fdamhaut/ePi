@@ -19,6 +19,7 @@
 #include "Solver.hpp"
 #include <iostream>
 #include <pybind11/pybind11.h>
+#include <stdint.h>
 #include <sys/time.h>
 
 using namespace GameSolver::Connect4;
@@ -77,8 +78,45 @@ int main(int argc, char** argv) {
   }
 }
 
+int solve(std::string num) {
+	Solver solver;
+	solver.loadBook("7x6.book");
+
+	Position P;
+	P.play(num);
+
+	return solver.solve(P, false);
+}
+
+uintptr_t createSolver() {
+	Solver* solver = new Solver();
+	(*solver).loadBook("7x6.book");
+	return reinterpret_cast<uintptr_t>(solver);
+}
+
+void deleteSolver(uintptr_t solver_addr) {
+	Solver* solver = reinterpret_cast<Solver*>(solver_addr);
+	delete solver;
+}
+
+int solverSolve(uintptr_t solver_addr, std::string num) {
+	Solver* solver = reinterpret_cast<Solver*>(solver_addr);
+	Position P;
+	P.play(num);
+	return (*solver).solve(P, false);
+}
+
+
+
 PYBIND11_MODULE(c4solver, m) {
     m.doc() = "Puissance 4 solver"; // optional module docstring
 
-    m.def("solve", &main, "p4s");
+    m.def("solve", &solve, "Simple solve");
+
+	m.def("Solver", &createSolver, "Create simple solver");
+
+	m.def("deleteSolver", &deleteSolver, "Delete simple solver");
+
+	m.def("solverSolve", &solverSolve, "Solve with a solver");
+
 }

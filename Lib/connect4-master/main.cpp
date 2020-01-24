@@ -66,11 +66,8 @@ int main(int argc, char** argv) {
     if(P.play(line) != line.size()) {
       std::cerr << "Line " << l << ": Invalid move " << (P.nbMoves() + 1) << " \"" << line << "\"" << std::endl;
     } else {
-      solver.reset();
-      unsigned long long start_time = getTimeMicrosec();
       int score = solver.solve(P, weak);
-      unsigned long long end_time = getTimeMicrosec();
-      std::cout << line << " " << score << " " << solver.getNodeCount() << " " << (end_time - start_time);
+      std::cout << line << " " << score;
     }
     std::cout << std::endl;
   }

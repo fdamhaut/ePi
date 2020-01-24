@@ -110,5 +110,4 @@ if __name__ == "__main__":
     template = "ImagesTest/template.jpg"
     grid = process_image(img, template)
 
-    for l in grid:
-        print(l)
+    print(grid)

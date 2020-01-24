@@ -1,18 +1,11 @@
-CXX=c++
-CXXFLAGS=--std=c++11 -W -Wall -O3 -shared -fPIC `python3 -m pybind11 --includes`
+c4solver: main.o Solver.o
+	c++ -O3 -Wall -shared -std=c++11 -fPIC `python3 -m pybind11 --includes` main.o Solver.o  -o c4solver`python3-config --extension-suffix`
 
-SRCS=Solver.cpp
-OBJS=$(subst .cpp,.o,$(SRCS))
-
-c4solver:
-	$(CXX) $(LDFLAGS) $(CXXFLAGS) -o c4solver.`python3-config --extension-suffix` main.cpp $(LOADLIBES) $(LDLIBS)
-
-.depend: $(SRCS)
-	$(CXX) $(CXXFLAGS) -MM $^ > ./.depend
+main.o:
+	c++ -O3 -Wall -shared -std=c++11 -fPIC `python3 -m pybind11 --includes` -c main.cpp -o main.o
 	
--include .depend
+Solver.o:
+	c++ -O3 -Wall -shared -std=c++11 -fPIC `python3 -m pybind11 --includes` -c Solver.cpp -o Solver.o
 
 clean:
-	rm -f *.o .depend c4solver generator
-
-
+	rm -f *.o c4solver.*
