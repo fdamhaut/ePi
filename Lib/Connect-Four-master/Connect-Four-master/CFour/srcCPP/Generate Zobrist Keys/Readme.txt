@@ -1,1 +1,0 @@
-This program creates the 84 (2x42) Zobrist-Keys for the Alpha-Beta-Search.

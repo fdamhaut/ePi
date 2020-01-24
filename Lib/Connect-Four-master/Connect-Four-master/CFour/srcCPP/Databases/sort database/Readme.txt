@@ -1,1 +1,0 @@
-Sorting-program for a early version of the the 8-Ply-database.

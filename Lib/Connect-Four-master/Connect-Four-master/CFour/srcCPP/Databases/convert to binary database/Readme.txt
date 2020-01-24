@@ -1,1 +1,0 @@
-Convert a database from the text-format in a binary form.
